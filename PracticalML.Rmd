@@ -1,0 +1,64 @@
+---
+title: "PracticalML1"
+author: "olologin"
+date: "01/25/2015"
+output: html_document
+---
+
+First thing that i need to do is to load dataset and filter it from "Division by zero", NA's or blank values.
+
+```{r, message=FALSE}
+library(caret)
+library(randomForest)
+dataset <- read.csv("./pml-training.csv", header = TRUE)
+
+validColumns <- 
+    c("roll_belt",            "pitch_belt",           "yaw_belt",             "total_accel_belt",
+      "gyros_belt_x",         "gyros_belt_y",         "gyros_belt_z",         "accel_belt_x",
+      "accel_belt_y",         "accel_belt_z",         "magnet_belt_x",        "magnet_belt_y",
+      "magnet_belt_z",        "roll_arm",             "pitch_arm",            "yaw_arm",
+      "total_accel_arm",      "gyros_arm_x",          "gyros_arm_y",          "gyros_arm_z",
+      "accel_arm_x",          "accel_arm_y",          "accel_arm_z",          "magnet_arm_x",
+      "magnet_arm_y",         "magnet_arm_z",         "roll_dumbbell",        "pitch_dumbbell",      
+      "yaw_dumbbell",         "total_accel_dumbbell", "gyros_dumbbell_x",     "gyros_dumbbell_y",
+      "gyros_dumbbell_z",     "accel_dumbbell_x",     "accel_dumbbell_y",     "accel_dumbbell_z",
+      "magnet_dumbbell_x",    "magnet_dumbbell_y",    "magnet_dumbbell_z",    "roll_forearm",
+      "pitch_forearm",        "yaw_forearm",          "total_accel_forearm",  "gyros_forearm_x",
+      "gyros_forearm_y",      "gyros_forearm_z",      "accel_forearm_x",      "accel_forearm_y",
+      "accel_forearm_z",      "magnet_forearm_x",     "magnet_forearm_y",     "magnet_forearm_z",
+      "classe"
+      )
+cleanedDataset <- dataset[, validColumns]
+```
+At this point dataset contains only 52 features.
+Next i separate dataset into train and test parts of fixed size:
+```{r}
+inTrain <- createDataPartition(y=cleanedDataset$classe, p=0.6, list=FALSE)
+training <- cleanedDataset[inTrain,]
+testing <- cleanedDataset[-inTrain,]
+```
+
+I used 'randomForest' function instead of random forests from caret library because in my case 'randomForest' worked faster that caret implementation of random forests.
+```{r, message=FALSE}
+model <- randomForest(training$classe ~ ., data=training[,-53])
+predicted <- predict(model, testing[,-53])
+confusionMatrix(predicted, testing$classe)
+```
+
+As you can see - with raw features we can achieve 99% accuracy. We can also try to minimize set of features by combining raw features with PCA,
+after that we can capture 95% of variance with 24 features (24 Principal components). With this set of features we can achieve only 96% accuracy.
+
+```{r, message=FALSE}
+preProc <- preProcess(x=training[,-53], 
+                      method = "pca", 
+                      pcaComp = 24,
+                      na.remove = TRUE
+                      )
+
+trainingPC <- predict(preProc,training[,-53])
+testingPC <- predict(preProc,testing[,-53])
+
+modelPC <- randomForest(training$classe ~ ., data=trainingPC)
+predictedPC <- predict(modelPC, testingPC)
+confusionMatrix(predictedPC, testing$classe)
+```
