@@ -68,7 +68,7 @@ img {
 </div>
 
 
-<p>First thing that i need to do is to load dataset and filter it from “Division by zero”, NA’s or blank values.</p>
+<p>First thing that I need to do is to load dataset and filter it from “Division by zero”, NA’s or blank values.</p>
 <pre class="r"><code>library(caret)
 library(randomForest)
 dataset &lt;- read.csv(&quot;./pml-training.csv&quot;, header = TRUE)
@@ -90,11 +90,11 @@ validColumns &lt;-
       &quot;classe&quot;
       )
 cleanedDataset &lt;- dataset[, validColumns]</code></pre>
-<p>At this point dataset contains only 52 features. Next i separate dataset into train and test parts of fixed size:</p>
+<p>At this point dataset contains only 52 features. Next I separate dataset into train and test parts of fixed size:</p>
 <pre class="r"><code>inTrain &lt;- createDataPartition(y=cleanedDataset$classe, p=0.6, list=FALSE)
 training &lt;- cleanedDataset[inTrain,]
 testing &lt;- cleanedDataset[-inTrain,]</code></pre>
-<p>I used ‘randomForest’ function instead of random forests from caret library because in my case ‘randomForest’ worked faster that caret implementation of random forests.</p>
+<p>I used ‘randomForest’ function instead of random forests from caret library because in my case ‘randomForest’ worked faster than caret implementation of random forests.</p>
 <pre class="r"><code>model &lt;- randomForest(training$classe ~ ., data=training[,-53])
 predicted &lt;- predict(model, testing[,-53])
 confusionMatrix(predicted, testing$classe)</code></pre>

@@ -5,7 +5,7 @@ date: "01/25/2015"
 output: html_document
 ---
 
-First thing that i need to do is to load dataset and filter it from "Division by zero", NA's or blank values.
+First thing that I need to do is to load dataset and filter it from "Division by zero", NA's or blank values.
 
 ```{r, message=FALSE}
 library(caret)
@@ -31,14 +31,14 @@ validColumns <-
 cleanedDataset <- dataset[, validColumns]
 ```
 At this point dataset contains only 52 features.
-Next i separate dataset into train and test parts of fixed size:
+Next I separate dataset into train and test parts of fixed size:
 ```{r}
 inTrain <- createDataPartition(y=cleanedDataset$classe, p=0.6, list=FALSE)
 training <- cleanedDataset[inTrain,]
 testing <- cleanedDataset[-inTrain,]
 ```
 
-I used 'randomForest' function instead of random forests from caret library because in my case 'randomForest' worked faster that caret implementation of random forests.
+I used 'randomForest' function instead of random forests from caret library because in my case 'randomForest' worked faster than caret implementation of random forests.
 ```{r, message=FALSE}
 model <- randomForest(training$classe ~ ., data=training[,-53])
 predicted <- predict(model, testing[,-53])
